@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificador de CTE</title>
+    <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Verificador de CTE</h1>
+        <input type="file" id="inputArquivo" accept=".xlsx, .xls">
+        <button onclick="verificarCTE()">Verificar CTE</button>
+        <div>
+            <label for="resultado">Ctes a serem cancelados:</label>
+            <input id="resultado" readonly>
+        </div>
+        <div>
+            <label for="notasResultado">Notas fiscais dos Ctes com cargas diferentes:</label>
+            <textarea id="notasResultado" readonly></textarea>
+        </div>
+        <div>
+            <label for="notasRepetidasResultado">Notas fiscais repetidas:</label>
+            <textarea id="notasRepetidasResultado" readonly></textarea>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
