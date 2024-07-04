@@ -30,9 +30,11 @@ function handleFile(event) {
 function verificarCTE() {
     let divResultado = document.getElementById('resultado');
     let notasResultado = document.getElementById('notasResultado');
+    let notasCargaResultado = document.getElementById('notasCargaResultado');
     let notasRepetidasResultado = document.getElementById('notasRepetidasResultado');
     divResultado.value = '';
     notasResultado.value = '';
+    notasCargaResultado.value = '';
     notasRepetidasResultado.value = '';
 
     if (dados.length === 0) {
@@ -43,6 +45,7 @@ function verificarCTE() {
     let ctesDivergentes = [];
     let notasDivergentes = {};
     let notasRepetidas = {};
+    let notasPorCarga = {};
 
     const ctesCod = {};
     const ctesCarga = {};
@@ -71,6 +74,12 @@ function verificarCTE() {
                 ctesCarga[Cte][Carga] = new Set();
             }
             ctesCarga[Cte][Carga].add(NotaFiscal);
+
+            // Agrupar notas fiscais por carga
+            if (!notasPorCarga[Carga]) {
+                notasPorCarga[Carga] = new Set();
+            }
+            notasPorCarga[Carga].add(NotaFiscal);
         }
 
         if (NotaFiscal) {
@@ -97,6 +106,21 @@ function verificarCTE() {
         }
     }
 
+    for (let carga in ctesCarga) {
+        for (let cargaKey in ctesCarga[carga]) {
+            if (!notasPorCarga[cargaKey]) {
+                notasPorCarga[cargaKey] = new Set();
+            }
+            ctesCarga[carga][cargaKey].forEach(nota => {
+                notasPorCarga[cargaKey].add(nota);
+            });
+        }
+    }
+
+    for (let carga in notasPorCarga) {
+        notasPorCarga[carga] = Array.from(notasPorCarga[carga]).join(', ');
+    }
+
     for (let nota in notasCteMap) {
         if (notasCteMap[nota].length > 1) {
             notasCteMap[nota].sort((a, b) => a - b);
@@ -118,6 +142,26 @@ function verificarCTE() {
         notasResultado.value = 'Nenhum Cte com cargas diferentes encontrado.';
     }
 
+    // Organizar as notas fiscais por carga com base nas notas do notasResultado
+    const notasPorCargaMap = {};
+    Object.entries(notasDivergentes).forEach(([cte, cargas]) => {
+        Object.keys(ctesCarga[cte]).forEach(carga => {
+            const notas = Array.from(ctesCarga[cte][carga]);
+            if (!notasPorCargaMap[carga]) {
+                notasPorCargaMap[carga] = [];
+            }
+            notasPorCargaMap[carga] = [...notasPorCargaMap[carga], ...notas];
+        });
+    });
+
+    if (Object.keys(notasPorCargaMap).length > 0) {
+        notasCargaResultado.value = Object.entries(notasPorCargaMap).map(([carga, notas]) => {
+            return `Carga ${carga}:\n${notas.join(', ')}`;
+        }).join('\n\n');
+    } else {
+        notasCargaResultado.value = 'Nenhuma nota fiscal encontrada por carga.';
+    }
+
     if (Object.keys(notasRepetidas).length > 0) {
         notasRepetidasResultado.value = Object.entries(notasRepetidas).map(([nota, ctes]) => {
             return `Nota Fiscal ${nota}: ${ctes.join(', ')} (Primeiro Cte: ${ctes[0]})`;
@@ -130,6 +174,8 @@ function verificarCTE() {
     divResultado.setSelectionRange(0, 99999);
     notasResultado.select();
     notasResultado.setSelectionRange(0, 99999);
+    notasCargaResultado.select();
+    notasCargaResultado.setSelectionRange(0, 99999);
     notasRepetidasResultado.select();
     notasRepetidasResultado.setSelectionRange(0, 99999);
 
