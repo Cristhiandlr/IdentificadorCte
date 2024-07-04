@@ -42,7 +42,10 @@ button:hover {
     background-color: #0056b3;
 }
 
-input#resultado, textarea#notasResultado, textarea#notasRepetidasResultado {
+input#resultado, 
+textarea#notasResultado, 
+textarea#notasCargaResultado, 
+textarea#notasRepetidasResultado {
     margin-top: 20px;
     padding: 10px;
     font-size: 16px;
@@ -51,7 +54,9 @@ input#resultado, textarea#notasResultado, textarea#notasRepetidasResultado {
     border-radius: 4px;
 }
 
-textarea#notasResultado, textarea#notasRepetidasResultado {
+textarea#notasResultado, 
+textarea#notasCargaResultado, 
+textarea#notasRepetidasResultado {
     height: 150px;
     resize: none;
 }
