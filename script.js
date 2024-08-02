@@ -107,24 +107,35 @@ function verificarCTE() {
         }
     }
 
-    for (let nota in notasCteMap) {
-        if (notasCteMap[nota].length > 1) {
-            notasCteMap[nota].sort((a, b) => a - b);
-            notasRepetidas[nota] = notasCteMap[nota];
-            const menorCte = notasCteMap[nota][0];
-            const outrosCtes = notasCteMap[nota].slice(1);
-
-            // Adicionar o menor CTE à carga e os outros CTEs à lista de duplicados
-            for (let carga in ctesCarga) {
-                if (ctesCarga[menorCte] && ctesCarga[menorCte][carga]) {
-                    if (!ctesDuplicadosPorCarga[carga]) {
-                        ctesDuplicadosPorCarga[carga] = new Set();
-                    }
-                    outrosCtes.forEach(cte => ctesDuplicadosPorCarga[carga].add(cte));
-                }
+    // Mapeia os CTEs com notas fiscais repetidas
+    const notasPorCarga = {};
+    Object.entries(ctesCarga).forEach(([cte, cargas]) => {
+        Object.entries(cargas).forEach(([carga, notas]) => {
+            if (!notasPorCarga[carga]) {
+                notasPorCarga[carga] = { ctes: new Set(), notas: new Set() };
             }
-        }
-    }
+            notasPorCarga[carga].ctes.add(cte);
+            notas.forEach(nota => {
+                notasPorCarga[carga].notas.add(nota);
+            });
+        });
+    });
+
+    Object.entries(notasPorCarga).forEach(([carga, { ctes, notas }]) => {
+        const notasArray = Array.from(notas);
+        notasArray.forEach(nota => {
+            if (notasCteMap[nota] && notasCteMap[nota].length > 1) {
+                const sortedCtes = [...new Set(notasCteMap[nota])].sort((a, b) => a - b);
+                const menorCte = sortedCtes[0];
+                const outrosCtes = sortedCtes.slice(1);
+
+                if (!ctesDuplicadosPorCarga[carga]) {
+                    ctesDuplicadosPorCarga[carga] = {};
+                }
+                ctesDuplicadosPorCarga[carga][menorCte] = outrosCtes;
+            }
+        });
+    });
 
     if (ctesDivergentes.length > 0) {
         divResultado.value = ctesDivergentes.join(', ');
@@ -141,12 +152,14 @@ function verificarCTE() {
     }
 
     if (Object.keys(ctesPorCarga).length > 0) {
-        notasCargaResultado.value = Object.entries(ctesPorCarga).map(([carga, ctes]) => {
+        notasCargaResultado.value = Object.entries(ctesPorCarga).map(([carga, { ctes }]) => {
             const ctesPorCargaTexto = `Carga ${carga}:\n${Array.from(ctes).join(', ')}`;
-            const ctesDuplicadasPorCargaTexto = ctesDuplicadosPorCarga[carga] && Array.from(ctesDuplicadosPorCarga[carga]).length > 0 
-                ? `\nCtes com notas fiscais duplicadas: ${Array.from(ctesDuplicadosPorCarga[carga]).join(', ')}`
+            const ctesDuplicadosPorCargaTexto = ctesDuplicadosPorCarga[carga] 
+                ? Object.entries(ctesDuplicadosPorCarga[carga]).map(([cteMenor, outrosCtes]) => {
+                    return `Carga ${carga}: ${cteMenor} (CTE Menor)\nCTEs com notas fiscais repetidas: ${outrosCtes.join(', ')}`;
+                }).join('\n')
                 : '';
-            return `${ctesPorCargaTexto}${ctesDuplicadasPorCargaTexto}`;
+            return `${ctesPorCargaTexto}${ctesDuplicadosPorCargaTexto}`;
         }).join('\n\n');
     } else {
         notasCargaResultado.value = 'Nenhum Cte encontrado por carga.';
