@@ -88,12 +88,6 @@ function verificarCTE() {
                 ctesPorCarga[Carga] = new Set();
             }
             ctesPorCarga[Carga].add(Cte);
-
-            // Agrupar CTEs duplicados por carga
-            if (!ctesDuplicadasPorCarga[Carga]) {
-                ctesDuplicadasPorCarga[Carga] = new Set();
-            }
-            ctesDuplicadasPorCarga[Carga].add(Cte);
         }
 
         if (NotaFiscal) {
